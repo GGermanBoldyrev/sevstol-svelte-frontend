@@ -35,5 +35,10 @@
 		"typescript": "^6.0.2",
 		"typescript-eslint": "^8.58.1",
 		"vite": "^8.0.7"
+	},
+	"dependencies": {
+		"flowbite": "^4.0.1",
+		"flowbite-svelte": "^1.33.1",
+		"flowbite-svelte-icons": "^3.1.0"
 	}
 }
