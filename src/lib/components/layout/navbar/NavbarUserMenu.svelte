@@ -43,7 +43,7 @@
 
 	<div class="space-y-0.5 mt-2">
 		<DropdownItem
-			href="/settings"
+			href="/settings/profile"
 			class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-600 hover:bg-primary-50 hover:text-primary-600 transition-colors border-none before:hidden font-medium"
 		>
 			<UserSettingsOutline class="w-[18px] h-[18px]" />

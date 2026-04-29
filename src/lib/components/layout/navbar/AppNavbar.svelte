@@ -2,9 +2,9 @@
 	import { GridSolid } from 'flowbite-svelte-icons';
 
 	// Импорты наших новых компонентов
-	import BrandLogo from './BrandLogo.svelte';
+	import BrandLogo from './NavbarLogo.svelte';
 	import HeaderSearch from './NavbarSearch.svelte';
-	import UserMenu from './UserMenu.svelte';
+	import UserMenu from './NavbarUserMenu.svelte';
 
 	interface Props {
 		userName?: string;
