@@ -33,6 +33,4 @@ pnpm-debug.log*
 .pnpm-debug.log*
 
 # Ide tools
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
+.vscode/
