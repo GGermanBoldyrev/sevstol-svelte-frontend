@@ -1,0 +1,238 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    /* ── Primary: Navy ── */
+    --color-primary-50: #f0f3f9;
+    --color-primary-100: #dde5f2;
+    --color-primary-200: #cdd8ee;
+    --color-primary-300: #a3badb;
+    --color-primary-400: #7595c7;
+    --color-primary-500: #1a2e56;
+    --color-primary-600: #16264a;
+    --color-primary-700: #121f3d;
+    --color-primary-800: #0e1830;
+    --color-primary-900: #0a1124;
+
+    /* ── Secondary: Gold ── */
+    --color-secondary-50: #f7f2e8;
+    --color-secondary-100: #f1e2bc;
+    --color-secondary-200: #e7ce8f;
+    --color-secondary-300: #dbb562;
+    --color-secondary-400: #c5a367;
+    --color-secondary-500: #b08d55;
+    --color-secondary-600: #8f7145;
+    --color-secondary-700: #6e5737;
+    --color-secondary-800: #54432c;
+    --color-secondary-900: #3a2e1e;
+
+    /* ── Surface ── */
+    --color-surface: #f8fafc;
+    /* slate-50 — основной фон */
+    --color-surface-card: #ffffff;
+    /* карточки */
+    --color-surface-subtle: #f1f5f9;
+    /* вторичные поверхности, сайдбар */
+
+    /* ── Semantic ── */
+    --color-success-50: #f0faf4;
+    --color-success-500: #2d7a4f;
+    --color-success-600: #1e5e3a;
+
+    --color-warning-50: #fffbeb;
+    --color-warning-500: #b45309;
+    --color-warning-600: #92400e;
+
+    --color-danger-50: #fef2f2;
+    --color-danger-500: #b91c1c;
+    --color-danger-600: #991b1b;
+
+    --color-info-50: #eff6ff;
+    --color-info-500: #1d4ed8;
+    --color-info-600: #1e40af;
+}
+
+@source "../../../node_modules/flowbite-svelte/dist";
+@source "../../../node_modules/flowbite-svelte-icons/dist";
+
+@layer base {
+    input[type="search"]::-webkit-search-cancel-button {
+        display: none;
+    }
+
+    body {
+        @apply bg-surface text-slate-900 antialiased;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        @apply bg-transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        @apply bg-slate-300 rounded-full;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-slate-400;
+    }
+}
+
+@layer components {
+
+    /* ── Navbar ── */
+    .navbar-brand-icon {
+        @apply w-8 h-8 rounded-lg bg-secondary-400 flex items-center justify-center text-primary-500 text-xs font-medium;
+    }
+
+    /* ── Cards ── */
+    .card {
+        @apply bg-surface-card border border-slate-200/80 rounded-xl p-5;
+    }
+
+    .card-sm {
+        @apply bg-surface-card border border-slate-200/80 rounded-lg p-4;
+    }
+
+    /* ── Metric card ── */
+    .metric-label {
+        @apply text-xs text-slate-500 uppercase tracking-wide mb-1;
+    }
+
+    .metric-value {
+        @apply text-2xl font-medium text-slate-900;
+    }
+
+    .metric-delta-up {
+        @apply text-xs text-success-500 mt-1;
+    }
+
+    .metric-delta-down {
+        @apply text-xs text-danger-500 mt-1;
+    }
+
+    /* ── Badges ── */
+    .badge {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    }
+
+    .badge-primary {
+        @apply bg-primary-50 text-primary-500;
+    }
+
+    .badge-gold {
+        @apply bg-secondary-50 text-secondary-700;
+    }
+
+    .badge-success {
+        @apply bg-success-50 text-success-600;
+    }
+
+    .badge-warning {
+        @apply bg-warning-50 text-warning-600;
+    }
+
+    .badge-danger {
+        @apply bg-danger-50 text-danger-500;
+    }
+
+    .badge-neutral {
+        @apply bg-slate-100 text-slate-600;
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+        @apply inline-flex items-center gap-2 px-4 h-9 rounded-lg text-sm font-medium transition-colors cursor-pointer border-0 bg-primary-500 text-white hover:bg-primary-600;
+    }
+
+    .btn-outline {
+        @apply inline-flex items-center gap-2 px-4 h-9 rounded-lg text-sm font-medium transition-colors cursor-pointer bg-transparent text-primary-500 ring-1 ring-inset ring-primary-500 hover:bg-primary-50;
+    }
+
+    .btn-gold {
+        @apply inline-flex items-center gap-2 px-4 h-9 rounded-lg text-sm font-medium transition-colors cursor-pointer border-0 bg-secondary-400 text-primary-700 hover:bg-secondary-500;
+    }
+
+    .btn-ghost {
+        @apply inline-flex items-center gap-2 px-4 h-9 rounded-lg text-sm font-medium transition-colors cursor-pointer border-0 bg-transparent text-slate-600 hover:bg-slate-100;
+    }
+
+    .btn-danger {
+        @apply inline-flex items-center gap-2 px-4 h-9 rounded-lg text-sm font-medium transition-colors cursor-pointer border-0 bg-danger-50 text-danger-500 hover:bg-danger-500 hover:text-white;
+    }
+
+    /* ── Sidebar item ── */
+    .sidebar-item-active {
+        @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm bg-primary-50 text-primary-500 font-medium hover:bg-primary-100 transition-colors cursor-pointer;
+    }
+
+    /* ── Table ── */
+    .data-table {
+        @apply w-full text-sm text-left;
+    }
+
+    .data-table thead th {
+        @apply px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide border-b border-slate-200 bg-surface-subtle;
+    }
+
+    .data-table tbody td {
+        @apply px-4 py-3 border-b border-slate-100 text-slate-800;
+    }
+
+    .data-table tbody tr:last-child td {
+        @apply border-b-0;
+    }
+
+    .data-table tbody tr:hover td {
+        @apply bg-slate-50;
+    }
+
+    /* ── Form inputs ── */
+    .input {
+        @apply w-full h-9 px-3 rounded-lg border border-slate-200 text-sm text-slate-900 bg-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition;
+    }
+
+    .input-label {
+        @apply block text-sm font-medium text-slate-700 mb-1.5;
+    }
+
+    /* ── Page header ── */
+    .page-title {
+        @apply text-2xl font-light text-primary-500;
+    }
+
+    .page-subtitle {
+        @apply text-sm text-slate-500 mt-0.5;
+    }
+
+    /* ── Divider ── */
+    .divider {
+        @apply border-t border-slate-200;
+    }
+}
+
+@layer base {
+
+    [role="menu"],
+    [role="menu"] ul,
+    [role="menu"] li {
+        @apply !list-none !p-0 !m-0 !border-none !outline-none;
+    }
+
+    [role="menu"] li::before,
+    [role="menu"] li::marker {
+        content: none !important;
+        display: none !important;
+    }
+
+    input:focus {
+        @apply !ring-4 !ring-primary-100 !border-primary-300 !outline-none !shadow-none;
+    }
+}
