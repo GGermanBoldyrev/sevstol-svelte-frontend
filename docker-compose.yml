@@ -1,0 +1,13 @@
+services:
+  frontend:
+    container_name: sevstol-frontend-dev
+    build:
+      context: .
+      dockerfile: docker/dev.Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development

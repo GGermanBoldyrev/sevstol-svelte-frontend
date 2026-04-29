@@ -1,0 +1,27 @@
+version: "3"
+
+tasks:
+  up:
+    desc: Поднять проект для разработки
+    cmds:
+      - docker-compose up --build
+
+  down:
+    desc: Остановить проект
+    cmds:
+      - docker-compose down
+
+  install:
+    desc: Установить пакет (task install PKG=lucide-svelte)
+    cmds:
+      - docker-compose run --rm frontend bun add {{.PKG}}
+
+  build-prod:
+    desc: Собрать продакшн образ
+    cmds:
+      - docker build -t sevstol-frontend:latest -f docker/prod.Dockerfile .
+
+  sh:
+    desc: Зайти внутрь контейнера
+    cmds:
+      - docker-compose run --rm frontend /bin/bash
