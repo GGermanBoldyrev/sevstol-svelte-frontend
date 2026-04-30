@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { GridSolid } from 'flowbite-svelte-icons';
 
-	// Импорты наших новых компонентов
 	import BrandLogo from './NavbarLogo.svelte';
 	import HeaderSearch from './NavbarSearch.svelte';
 	import UserMenu from './NavbarUserMenu.svelte';
@@ -16,28 +15,23 @@
 	<nav
 		class="max-w-7xl mx-auto bg-white/90 backdrop-blur-xl border border-slate-200/80 rounded-2xl px-4 h-16 flex items-center justify-between shadow-sm shadow-slate-200/50 gap-4 transition-all"
 	>
-		<!-- 1. Логотип -->
 		<BrandLogo />
 
-		<!-- 2. Поиск -->
 		<div class="flex-1 max-w-lg hidden md:block ml-4">
 			<HeaderSearch />
 		</div>
 
-		<!-- 3. Правая панель кнопок -->
 		<div class="flex items-center gap-3 md:gap-4">
-			<!-- Кнопка администрирования (пока оставил тут, так как она простая) -->
-			<button
-				class="flex items-center justify-center gap-2 px-3 lg:px-4 h-10 bg-white text-slate-600 rounded-xl border border-slate-200/80 font-medium hover:text-primary-600 hover:bg-primary-50 hover:border-primary-200 transition-all shadow-sm shadow-slate-200/30 cursor-pointer"
+			<a
+				href="/admin/positions"
+				class="flex items-center justify-center gap-2 px-3 lg:px-4 h-10 bg-white text-slate-600 rounded-xl border border-slate-200/80 font-medium hover:text-primary-600 hover:bg-primary-50 hover:border-primary-200 transition-all shadow-sm shadow-slate-200/30 no-underline"
 			>
 				<GridSolid class="w-4 h-4" />
 				<span class="text-sm hidden lg:inline tracking-wide">Администрирование</span>
-			</button>
+			</a>
 
 			<div class="w-px h-6 bg-slate-200 hidden md:block"></div>
-			<!-- Разделитель -->
 
-			<!-- Пользовательское меню -->
 			<UserMenu {userName} />
 		</div>
 	</nav>
