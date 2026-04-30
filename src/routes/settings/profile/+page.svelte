@@ -54,14 +54,10 @@
 
 	async function handleSave() {
 		if (!validation.isValid || !isDirty) return;
-
 		isSaving = true;
 		await new Promise((r) => setTimeout(r, 1000));
-
 		savedVersion = { ...formData };
-
 		passwordData = { newPassword: '', confirmPassword: '' };
-
 		isSaving = false;
 		alert.show('Изменения успешно применены');
 	}
@@ -222,17 +218,15 @@
 
 		{#if isDirty}
 			<div
-				transition:slide={{ axis: 'y' }}
-				class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-6"
+				transition:slide
+				class="flex items-center justify-end gap-6 mt-4 pt-6 border-t border-slate-200/50"
 			>
 				<button
-					type="button"
 					onclick={handleCancel}
-					class="bg-transparent border-none px-8 py-2 text-slate-500 hover:text-danger-600 font-medium transition-colors cursor-pointer"
+					class="text-xs font-bold text-slate-400 hover:text-danger-500 uppercase tracking-widest cursor-pointer"
 				>
-					Отклонить
+					Сбросить
 				</button>
-
 				<LoadingButton onclick={handleSave} loading={isSaving} disabled={!validation.isValid}>
 					Сохранить изменения
 				</LoadingButton>
@@ -240,9 +234,3 @@
 		{/if}
 	</div>
 </div>
-
-<style>
-	:global(body) {
-		padding-bottom: 100px;
-	}
-</style>

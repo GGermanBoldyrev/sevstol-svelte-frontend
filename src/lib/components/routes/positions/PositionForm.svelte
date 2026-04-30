@@ -117,7 +117,7 @@
 				onclick={onCancel}
 				class="text-xs font-bold text-slate-400 hover:text-danger-500 uppercase tracking-widest cursor-pointer"
 			>
-				{editingId ? 'Сбросить' : 'Очистить'}
+				{editingId ? 'Вернуть' : 'Очистить'}
 			</button>
 			<LoadingButton onclick={onSave} loading={isSaving} disabled={!validation.isValid}>
 				{editingId ? 'Сохранить изменения' : 'Создать позицию'}
