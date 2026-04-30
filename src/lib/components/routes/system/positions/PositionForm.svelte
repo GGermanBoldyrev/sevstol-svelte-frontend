@@ -4,8 +4,8 @@
 	import LoadingButton from '$lib/components/ui/LoadingButton.svelte';
 
 	interface Props {
-		data: { name: string; months?: number; days?: number; category: string };
-		savedData: any;
+		data: { name: string; months?: number; days?: number };
+		savedData: { name: string; months?: number; days?: number };
 		editingId: string | null;
 		isSaving: boolean;
 		onSave: () => void;
@@ -25,7 +25,7 @@
 
 	const validation = $derived({
 		nameTooShort: data.name.length > 0 && data.name.trim().length < 3,
-		namePatternInvalid: data.name.length > 0 && !/^[А-ЯЁа-яёA-Za-z0-9\s"'-]+$/.test(data.name),
+		namePatternInvalid: data.name.length > 0 && !/^[А-ЯЁа-яёA-Za-z0-9\s"'\-]+$/.test(data.name),
 		timeMissing: (data.months || 0) === 0 && (data.days || 0) === 0,
 		get isValid() {
 			return data.name.trim().length >= 3 && !this.namePatternInvalid && !this.timeMissing;
@@ -41,7 +41,7 @@
 	}
 
 	function handleNumberInput(e: Event & { currentTarget: HTMLInputElement }) {
-		let val = e.currentTarget.value;
+		const val = e.currentTarget.value;
 		if (val.length > 1 && val.startsWith('0')) {
 			e.currentTarget.value = val.replace(/^0+/, '');
 		}
@@ -54,35 +54,43 @@
 >
 	<div class="flex items-center justify-between mb-6">
 		<h3 class="text-lg font-bold text-slate-800">
-			{editingId ? 'Редактирование' : 'Новая позиция'}
+			{editingId ? 'Редактирование позиции' : 'Новая позиция'}
 		</h3>
-		<button onclick={onClose} class="text-slate-400 hover:text-slate-600"
-			><CloseOutline class="w-6 h-6" /></button
-		>
+		<button onclick={onClose} class="text-slate-400 hover:text-slate-600 transition-colors">
+			<CloseOutline class="w-6 h-6" />
+		</button>
 	</div>
 
 	<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 		<div class="lg:col-span-6 space-y-1.5">
-			<label class="input-label" for="n"
-				>Название товара <span class="text-danger-500">*</span></label
-			>
+			<label class="input-label" for="pos-name">
+				Название товара <span class="text-danger-500">*</span>
+			</label>
 			<input
-				id="n"
+				id="pos-name"
 				bind:value={data.name}
-				class="input {validation.nameTooShort ? 'border-danger-500' : ''}"
+				class="input {validation.nameTooShort || validation.namePatternInvalid
+					? 'border-danger-500'
+					: ''}"
 				placeholder="Введите название..."
 			/>
 			<div class="h-5">
-				{#if validation.nameTooShort}<p class="text-[10px] text-danger-500 font-bold uppercase">
+				{#if validation.nameTooShort}
+					<p class="text-[10px] text-danger-500 font-bold uppercase tracking-wider">
 						Минимум 3 символа
-					</p>{/if}
+					</p>
+				{:else if validation.namePatternInvalid}
+					<p class="text-[10px] text-danger-500 font-bold uppercase tracking-wider">
+						Недопустимые символы
+					</p>
+				{/if}
 			</div>
 		</div>
 
 		<div class="lg:col-span-3 space-y-1.5">
-			<label class="input-label" for="m">Месяцев</label>
+			<label class="input-label" for="pos-months">Месяцев</label>
 			<input
-				id="m"
+				id="pos-months"
 				type="number"
 				min="0"
 				onkeydown={handleNumberKeydown}
@@ -94,9 +102,9 @@
 		</div>
 
 		<div class="lg:col-span-3 space-y-1.5">
-			<label class="input-label" for="d">Дней</label>
+			<label class="input-label" for="pos-days">Дней</label>
 			<input
-				id="d"
+				id="pos-days"
 				type="number"
 				min="0"
 				onkeydown={handleNumberKeydown}
@@ -115,7 +123,7 @@
 		>
 			<button
 				onclick={onCancel}
-				class="text-xs font-bold text-slate-400 hover:text-danger-500 uppercase tracking-widest cursor-pointer"
+				class="text-xs font-bold text-slate-400 hover:text-danger-500 uppercase tracking-widest cursor-pointer transition-colors"
 			>
 				{editingId ? 'Вернуть' : 'Очистить'}
 			</button>

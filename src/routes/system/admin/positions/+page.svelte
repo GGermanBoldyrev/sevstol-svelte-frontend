@@ -5,8 +5,8 @@
 	import { PlusOutline, ExclamationCircleOutline } from 'flowbite-svelte-icons';
 	import { alert } from '$lib/state/alert.svelte';
 	import SearchBar from '$lib/components/ui/SearchBar.svelte';
-	import PositionForm from '$lib/components/routes/positions/PositionForm.svelte';
-	import PositionCard from '$lib/components/routes/positions/PositionCard.svelte';
+	import PositionForm from '$lib/components/routes/system/positions/PositionForm.svelte';
+	import PositionCard from '$lib/components/routes/system/positions/PositionCard.svelte';
 
 	interface Position {
 		id: string;
@@ -83,27 +83,55 @@
 	}
 
 	async function handleSave() {
-		isSaving = true;
-		await new Promise((r) => setTimeout(r, 800));
+		console.log('Попытка сохранения...', { editingId, formData });
 
-		if (editingId) {
-			const idx = positions.findIndex((p) => p.id === editingId);
-			if (idx !== -1) {
-				positions[idx] = { ...positions[idx], ...formData };
-			}
-			alert.show('Изменения успешно сохранены');
-		} else {
-			const newPos: Position = {
-				id: Math.random().toString(36).substring(2, 9),
-				...formData,
-				isArchived: false
-			};
-			positions = [newPos, ...positions];
-			alert.show('Позиция успешно создана');
+		if (!formData.name || formData.name.trim().length < 3) {
+			alert.show('Название слишком короткое', 'error');
+			return;
 		}
 
-		resetForm();
-		isSaving = false;
+		isSaving = true;
+		try {
+			// Имитируем задержку сети
+			await new Promise((r) => setTimeout(r, 800));
+
+			if (editingId) {
+				console.log('Режим редактирования. ID:', editingId);
+				const idx = positions.findIndex((p) => p.id === editingId);
+
+				if (idx !== -1) {
+					// В Svelte 5 для реактивности массива лучше заменять объект целиком
+					positions[idx] = {
+						...positions[idx],
+						...formData,
+						id: editingId // на всякий случай фиксируем ID
+					};
+					alert.show('Изменения сохранены', 'success');
+				} else {
+					console.error('Позиция с таким ID не найдена в массиве');
+				}
+			} else {
+				console.log('Режим создания новой позиции');
+				const newPos: Position = {
+					id: Math.random().toString(36).substring(2, 9),
+					name: formData.name,
+					months: formData.months || 0,
+					days: formData.days || 0,
+					isArchived: false
+				};
+				// Важно: в Svelte 5 positions = [...positions, newPos] работает надежнее
+				positions = [newPos, ...positions];
+				alert.show('Позиция успешно создана', 'success');
+			}
+
+			console.log('Обновленный список позиций:', positions);
+			resetForm();
+		} catch (e) {
+			console.error('Ошибка в handleSave:', e);
+			alert.show('Ошибка при сохранении', 'error');
+		} finally {
+			isSaving = false;
+		}
 	}
 
 	function toggleArchive(id: string) {
