@@ -1,221 +1,258 @@
 <script lang="ts">
-	import { scale } from 'svelte/transition';
-	import { flip } from 'svelte/animate';
-	import { quintOut } from 'svelte/easing';
-	import { PlusOutline, ExclamationCircleOutline } from 'flowbite-svelte-icons';
+	import { slide } from 'svelte/transition';
+	import { UserOutline, MailBoxOutline, LockOutline } from 'flowbite-svelte-icons';
 	import { alert } from '$lib/state/alert.svelte';
-	import SearchBar from '$lib/components/ui/SearchBar.svelte';
-	import PositionForm from '$lib/components/routes/system/positions/PositionForm.svelte';
-	import PositionCard from '$lib/components/routes/system/positions/PositionCard.svelte';
+	import LoadingButton from '$lib/components/ui/LoadingButton.svelte';
 
-	interface Position {
-		id: string;
-		name: string;
-		months?: number;
-		days?: number;
-		isArchived: boolean;
-	}
+	let savedVersion = $state({
+		firstName: 'Герман',
+		lastName: 'Болдырев',
+		middleName: 'Александрович',
+		email: 'german@example.com'
+	});
 
-	let positions = $state<Position[]>([
-		{
-			id: '1',
-			name: 'Печенье "Овсяное"',
-			months: 3,
-			days: 0,
-			isArchived: false
-		},
-		{
-			id: '2',
-			name: 'Крекер классический',
-			months: 0,
-			days: 180,
-			isArchived: false
-		}
-	]);
-
-	let searchQuery = $state('');
-	let showArchived = $state(false);
-
-	const emptyForm = { name: '', months: undefined, days: undefined };
-	let showAddForm = $state(false);
-	let editingId = $state<string | null>(null);
+	let formData = $state({ ...savedVersion });
+	let passwordData = $state({ newPassword: '', confirmPassword: '' });
 	let isSaving = $state(false);
 
-	let formData = $state({ ...emptyForm });
-	let savedVersion = $state({ ...emptyForm });
+	const nameRegex = /^[А-ЯЁа-яёA-Za-z\s-]+$/;
+	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-	const filteredPositions = $derived(
-		positions.filter(
-			(p) =>
-				p.isArchived === showArchived && p.name.toLowerCase().includes(searchQuery.toLowerCase())
-		)
+	const userInitials = $derived(formData.firstName?.[0]?.toUpperCase() || '?');
+
+	const isDirty = $derived(
+		formData.firstName !== savedVersion.firstName ||
+			formData.lastName !== savedVersion.lastName ||
+			formData.middleName !== savedVersion.middleName ||
+			formData.email !== savedVersion.email ||
+			passwordData.newPassword !== ''
 	);
 
-	function startAddNew() {
-		resetForm();
-		showAddForm = true;
-		showArchived = false;
-	}
+	const validation = $derived({
+		firstNameInvalid: formData.firstName.trim().length === 0 || !nameRegex.test(formData.firstName),
+		lastNameInvalid: formData.lastName.length > 0 && !nameRegex.test(formData.lastName),
+		middleNameInvalid: formData.middleName.length > 0 && !nameRegex.test(formData.middleName),
+		emailInvalid: formData.email.length > 0 && !emailRegex.test(formData.email),
+		passwordsMismatch:
+			passwordData.newPassword !== '' && passwordData.newPassword !== passwordData.confirmPassword,
+		get isValid() {
+			return (
+				!this.firstNameInvalid &&
+				!this.lastNameInvalid &&
+				!this.middleNameInvalid &&
+				!this.emailInvalid &&
+				!this.passwordsMismatch
+			);
+		}
+	});
 
-	function startEdit(pos: Position) {
-		editingId = pos.id;
-		const dataToEdit = {
-			name: pos.name,
-			months: pos.months,
-			days: pos.days
-		};
-		formData = { ...dataToEdit };
-		savedVersion = { ...dataToEdit };
-		showAddForm = true;
-		showArchived = false;
-		window.scrollTo({ top: 0, behavior: 'smooth' });
-	}
-
-	function resetForm() {
-		formData = { ...emptyForm };
-		savedVersion = { ...emptyForm };
-		editingId = null;
-		showAddForm = false;
-	}
-
-	function handleCancelChanges() {
+	function handleCancel() {
 		formData = { ...savedVersion };
+		passwordData = { newPassword: '', confirmPassword: '' };
 	}
 
 	async function handleSave() {
-		console.log('Попытка сохранения...', { editingId, formData });
-
-		if (!formData.name || formData.name.trim().length < 3) {
-			alert.show('Название слишком короткое', 'error');
-			return;
-		}
-
+		if (!validation.isValid || !isDirty) return;
 		isSaving = true;
-		try {
-			// Имитируем задержку сети
-			await new Promise((r) => setTimeout(r, 800));
-
-			if (editingId) {
-				console.log('Режим редактирования. ID:', editingId);
-				const idx = positions.findIndex((p) => p.id === editingId);
-
-				if (idx !== -1) {
-					// В Svelte 5 для реактивности массива лучше заменять объект целиком
-					positions[idx] = {
-						...positions[idx],
-						...formData,
-						id: editingId // на всякий случай фиксируем ID
-					};
-					alert.show('Изменения сохранены', 'success');
-				} else {
-					console.error('Позиция с таким ID не найдена в массиве');
-				}
-			} else {
-				console.log('Режим создания новой позиции');
-				const newPos: Position = {
-					id: Math.random().toString(36).substring(2, 9),
-					name: formData.name,
-					months: formData.months || 0,
-					days: formData.days || 0,
-					isArchived: false
-				};
-				// Важно: в Svelte 5 positions = [...positions, newPos] работает надежнее
-				positions = [newPos, ...positions];
-				alert.show('Позиция успешно создана', 'success');
-			}
-
-			console.log('Обновленный список позиций:', positions);
-			resetForm();
-		} catch (e) {
-			console.error('Ошибка в handleSave:', e);
-			alert.show('Ошибка при сохранении', 'error');
-		} finally {
-			isSaving = false;
-		}
+		await new Promise((r) => setTimeout(r, 1000));
+		savedVersion = { ...formData };
+		passwordData = { newPassword: '', confirmPassword: '' };
+		isSaving = false;
+		alert.show('Изменения успешно применены');
 	}
-
-	function toggleArchive(id: string) {
-		const idx = positions.findIndex((p) => p.id === id);
-		if (idx !== -1) {
-			positions[idx].isArchived = !positions[idx].isArchived;
-			alert.show(
-				positions[idx].isArchived ? 'Позиция перенесена в архив' : 'Позиция восстановлена'
-			);
-		}
-	}
-
-	const formatShelfLife = (m: number = 0, d: number = 0) => {
-		const parts = [];
-		if (m > 0) parts.push(`${m} мес.`);
-		if (d > 0) parts.push(`${d} дн.`);
-		return parts.join(' ') || 'не задан';
-	};
 </script>
 
 <div class="max-w-7xl mx-auto py-10 px-4 text-slate-900">
+	<!-- Заголовок — точно как на positions и honest-sign -->
 	<header class="flex items-start justify-between gap-4 mb-10 h-16">
 		<div>
-			<h1 class="text-3xl font-light text-primary-500 tracking-tight">Позиции компании</h1>
-			<p class="text-slate-500 mt-1">Управление каталогом и сроками хранения</p>
+			<h1 class="text-3xl font-light text-primary-500 tracking-tight">Настройки профиля</h1>
+			<p class="text-slate-500 mt-1">Управляйте личными данными и безопасностью</p>
 		</div>
-
-		{#if !showAddForm}
-			<button
-				transition:scale={{ duration: 150 }}
-				onclick={startAddNew}
-				class="btn-primary flex items-center gap-2 !h-12 px-6 shadow-lg shadow-primary-500/20"
-			>
-				<PlusOutline class="w-5 h-5" />
-				Добавить позицию
-			</button>
-		{/if}
 	</header>
 
-	<SearchBar
-		bind:value={searchQuery}
-		{showArchived}
-		placeholder={showArchived ? 'Поиск в архиве...' : 'Поиск по названию...'}
-		onToggleArchive={() => (showArchived = !showArchived)}
-	/>
-
-	{#if showAddForm}
-		<PositionForm
-			bind:data={formData}
-			savedData={savedVersion}
-			{editingId}
-			{isSaving}
-			onSave={handleSave}
-			onCancel={handleCancelChanges}
-			onClose={resetForm}
-		/>
-	{/if}
-
-	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-		{#each filteredPositions as pos (pos.id)}
-			<div animate:flip={{ duration: 400, easing: quintOut }}>
-				<PositionCard {pos} {formatShelfLife} onEdit={startEdit} onToggleArchive={toggleArchive} />
+	<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+		<!-- Левая колонка: аватар -->
+		<div class="lg:col-span-1">
+			<div class="card shadow-sm shadow-slate-200/50 flex items-center gap-5">
+				<div class="relative shrink-0">
+					<div
+						class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200/60 flex items-center justify-center text-primary-600 text-2xl font-bold"
+					>
+						{userInitials}
+					</div>
+					<div
+						class="absolute -bottom-1.5 -right-1.5 w-6 h-6 bg-white rounded-lg border border-slate-200 flex items-center justify-center shadow-sm text-slate-400"
+					>
+						<UserOutline class="w-3 h-3" />
+					</div>
+				</div>
+				<div>
+					<p class="text-sm font-semibold text-slate-800">
+						{formData.firstName}
+						{formData.lastName}
+					</p>
+					<p class="text-xs text-primary-500 uppercase font-bold tracking-widest mt-1">
+						Администратор
+					</p>
+				</div>
 			</div>
-		{:else}
-			<div
-				in:scale={{ duration: 200, delay: 100 }}
-				class="col-span-full py-20 text-center card bg-slate-50/50 border-dashed border-2"
-			>
-				<ExclamationCircleOutline class="w-12 h-12 text-slate-300 mx-auto mb-4" />
-				<p class="text-slate-500 font-medium">
-					{showArchived ? 'Архив пуст' : 'Активных позиций не найдено'}
-				</p>
-			</div>
-		{/each}
+		</div>
+
+		<!-- Правая колонка: формы -->
+		<div class="lg:col-span-2 space-y-6">
+			<!-- Личные данные -->
+			<section class="card shadow-sm shadow-slate-200/50">
+				<div class="flex items-center gap-2.5 mb-5 pb-4 border-b border-slate-100">
+					<UserOutline class="w-4 h-4 text-slate-400" />
+					<h3 class="text-xs font-bold uppercase tracking-widest text-slate-500">Личные данные</h3>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-1">
+					<div class="space-y-1.5">
+						<label for="firstName" class="input-label">
+							Имя <span class="text-danger-500">*</span>
+						</label>
+						<input
+							id="firstName"
+							bind:value={formData.firstName}
+							type="text"
+							class="input {validation.firstNameInvalid
+								? 'border-danger-500 focus:ring-danger-100'
+								: ''}"
+						/>
+						<div class="h-5">
+							{#if validation.firstNameInvalid}
+								<p class="text-[10px] text-danger-500 font-bold uppercase tracking-wider">
+									Некорректное имя
+								</p>
+							{/if}
+						</div>
+					</div>
+
+					<div class="space-y-1.5">
+						<label for="lastName" class="input-label">Фамилия</label>
+						<input
+							id="lastName"
+							bind:value={formData.lastName}
+							type="text"
+							class="input {validation.lastNameInvalid
+								? 'border-danger-500 focus:ring-danger-100'
+								: ''}"
+						/>
+						<div class="h-5">
+							{#if validation.lastNameInvalid}
+								<p class="text-[10px] text-danger-500 font-bold uppercase tracking-wider">
+									Некорректная фамилия
+								</p>
+							{/if}
+						</div>
+					</div>
+
+					<div class="space-y-1.5 md:col-span-2">
+						<label for="middleName" class="input-label">Отчество</label>
+						<input
+							id="middleName"
+							bind:value={formData.middleName}
+							type="text"
+							class="input {validation.middleNameInvalid
+								? 'border-danger-500 focus:ring-danger-100'
+								: ''}"
+						/>
+						<div class="h-5">
+							{#if validation.middleNameInvalid}
+								<p class="text-[10px] text-danger-500 font-bold uppercase tracking-wider">
+									Некорректное отчество
+								</p>
+							{/if}
+						</div>
+					</div>
+
+					<div class="space-y-1.5 md:col-span-2">
+						<label for="email" class="input-label">Электронная почта</label>
+						<div class="relative">
+							<MailBoxOutline
+								class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+							/>
+							<input
+								id="email"
+								bind:value={formData.email}
+								type="email"
+								class="input pl-10 {validation.emailInvalid
+									? 'border-danger-500 focus:ring-danger-100'
+									: ''}"
+							/>
+						</div>
+						<div class="h-5">
+							{#if validation.emailInvalid}
+								<p class="text-[10px] text-danger-500 font-bold uppercase tracking-wider">
+									Неверный формат почты
+								</p>
+							{/if}
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- Безопасность -->
+			<section class="card shadow-sm shadow-slate-200/50">
+				<div class="flex items-center gap-2.5 mb-5 pb-4 border-b border-slate-100">
+					<LockOutline class="w-4 h-4 text-slate-400" />
+					<h3 class="text-xs font-bold uppercase tracking-widest text-slate-500">Безопасность</h3>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-1">
+					<div class="space-y-1.5">
+						<label for="newPass" class="input-label">Новый пароль</label>
+						<input
+							id="newPass"
+							bind:value={passwordData.newPassword}
+							type="password"
+							class="input"
+							placeholder="••••••••"
+						/>
+						<div class="h-5"></div>
+					</div>
+
+					<div class="space-y-1.5">
+						<label for="confirmPass" class="input-label">Подтверждение</label>
+						<input
+							id="confirmPass"
+							bind:value={passwordData.confirmPassword}
+							type="password"
+							class="input {validation.passwordsMismatch
+								? 'border-danger-500 focus:ring-danger-100'
+								: ''}"
+							placeholder="••••••••"
+						/>
+						<div class="h-5">
+							{#if validation.passwordsMismatch}
+								<p class="text-[10px] text-danger-500 font-bold uppercase tracking-wider">
+									Пароли не совпадают
+								</p>
+							{/if}
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- Кнопки -->
+			{#if isDirty}
+				<div
+					transition:slide
+					class="flex items-center justify-end gap-6 pt-5 border-t border-slate-200/50"
+				>
+					<button
+						onclick={handleCancel}
+						class="text-xs font-bold text-slate-400 hover:text-danger-500 uppercase tracking-widest cursor-pointer transition-colors"
+					>
+						Сбросить
+					</button>
+					<LoadingButton onclick={handleSave} loading={isSaving} disabled={!validation.isValid}>
+						Сохранить изменения
+					</LoadingButton>
+				</div>
+			{/if}
+		</div>
 	</div>
 </div>
-
-<style>
-	:global(input::-webkit-outer-spin-button),
-	:global(input::-webkit-inner-spin-button) {
-		-webkit-appearance: none;
-		margin: 0;
-	}
-	:global(body) {
-		padding-bottom: 100px;
-	}
-</style>
