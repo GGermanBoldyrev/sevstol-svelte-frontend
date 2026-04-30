@@ -66,13 +66,6 @@
 					></span
 				>
 			</div>
-			<div class="flex items-center gap-2">
-				<TagOutline class="w-4 h-4" />
-				<span
-					class="bg-slate-100 px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider text-slate-600"
-					>{pos.category}</span
-				>
-			</div>
 		</div>
 	</div>
 

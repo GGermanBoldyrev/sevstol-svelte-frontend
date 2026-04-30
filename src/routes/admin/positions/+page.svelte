@@ -13,7 +13,6 @@
 		name: string;
 		months?: number;
 		days?: number;
-		category: string;
 		isArchived: boolean;
 	}
 
@@ -23,7 +22,6 @@
 			name: 'Печенье "Овсяное"',
 			months: 3,
 			days: 0,
-			category: 'Выпечка',
 			isArchived: false
 		},
 		{
@@ -31,7 +29,6 @@
 			name: 'Крекер классический',
 			months: 0,
 			days: 180,
-			category: 'Снеки',
 			isArchived: false
 		}
 	]);
@@ -39,7 +36,7 @@
 	let searchQuery = $state('');
 	let showArchived = $state(false);
 
-	const emptyForm = { name: '', months: undefined, days: undefined, category: 'Выпечка' };
+	const emptyForm = { name: '', months: undefined, days: undefined };
 	let showAddForm = $state(false);
 	let editingId = $state<string | null>(null);
 	let isSaving = $state(false);
@@ -65,8 +62,7 @@
 		const dataToEdit = {
 			name: pos.name,
 			months: pos.months,
-			days: pos.days,
-			category: pos.category
+			days: pos.days
 		};
 		formData = { ...dataToEdit };
 		savedVersion = { ...dataToEdit };
